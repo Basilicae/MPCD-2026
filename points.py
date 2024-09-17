@@ -56,6 +56,10 @@ def plot_3d_points(x, y, z):
     ax.set_zlabel('Z Label')
     plt.show()
 
+
+
+
+#wsh bien
 # Exemple d'utilisation
 x = np.array([1, 2, 3, 4, 5])
 y = np.array([5, 6, 2, 3, 13])
