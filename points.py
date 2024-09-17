@@ -1,4 +1,3 @@
-import numpy
 import numpy as np
 
 
@@ -27,10 +26,11 @@ class objet_rotation(objet):
         :param u: Le vecteur qui définit le sens de rotation
         """
         super().__init__(n)
-        self.points = numpy.array(points)
+        self.points = np.array(points)
         self.centre = np.array(centre)
         self.ones = np.ones((1,n))
         self.v, self.u =v, u
+        self.points_prec = np.array(points)
 
     def calcul_rot(self, theta):
         u = self.u
@@ -44,4 +44,13 @@ class objet_rotation(objet):
     def calc_points(self, t):
         self.calcul_rot(self.v*t)
         self.points = self.centre @ self.ones + self.rot @ self.points
+
+    def vitesse(self, t, delta_t, radar):
+        """
+        :param
+        :param t:
+        :param delta_t:
+        :return: Un tableau de une ligne et self.n colonnes, chaque colonne indique la vitesse du ième point par rapport au radar
+        """
+        self.points_prec = self.points.copy()
 
