@@ -1,11 +1,12 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
-from matplotlib.animation import FuncAnimation
+
 
 class objet:
     def __init__(self, n):
         self.n = n
+
 
 class objet_fixe(objet):
     def __init__(self, n,  points):
@@ -14,6 +15,8 @@ class objet_fixe(objet):
 
     def calc_points(self, t):
         pass
+
+
 
 class objet_rotation(objet):
     def __init__(self, n, points,  centre, v, u, radar):
@@ -55,6 +58,14 @@ class objet_rotation(objet):
         self.calc_points(t)
         distances = self.distance_radar(radar)
 
+
+
+
+import numpy as np
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+from matplotlib.animation import FuncAnimation
+
 def plot_3d_points(x, y, z):
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
@@ -80,3 +91,6 @@ y = np.array([5, 6, 2, 3, 13])
 z = np.array([2, 3, 3, 3, 5])
 
 plot_3d_points(x, y, z)
+
+
+
