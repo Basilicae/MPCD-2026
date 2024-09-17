@@ -57,7 +57,7 @@ class objet_rotation(objet):
         """
         self.calc_points(t)
         distances = self.distance_radar(radar)
-
+        return (distances - self.distance_anc)/delta_t
 
 
 
