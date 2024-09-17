@@ -58,13 +58,28 @@ import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
+import numpy as np
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+from matplotlib.animation import FuncAnimation
+
 def plot_3d_points(x, y, z):
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
-    ax.scatter(x, y, z, c='r', marker='o')
+    scatter = ax.scatter(x, y, z, c='r', marker='o')
     ax.set_xlabel('X Label')
     ax.set_ylabel('Y Label')
     ax.set_zlabel('Z Label')
+
+    def update(num, x, y, z, scatter):
+        # Exemple de mouvement : translation des points
+        x = x + 0.1 * num
+        y = y + 0.1 * num
+        z = z + 0.1 * num
+        scatter._offsets3d = (x, y, z)
+        return scatter,
+
+    ani = FuncAnimation(fig, update, frames=100, fargs=(x, y, z, scatter), interval=100, blit=False)
     plt.show()
 
 # Exemple d'utilisation
@@ -73,5 +88,6 @@ y = np.array([5, 6, 2, 3, 13])
 z = np.array([2, 3, 3, 3, 5])
 
 plot_3d_points(x, y, z)
+
 
 
