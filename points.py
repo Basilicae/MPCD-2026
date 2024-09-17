@@ -39,7 +39,9 @@ class objet_rotation(objet):
         self.rot = np.array([[u[0]**2*(1-c)+c, u[0]*u[1]*(1-c)-u[2]*s, u[0]*u[2]*(1-c)+u[1]*s],
                              [u[0]*u[1]*(1-c) + u[1]**2*(1-c)+c, u[1]*u[2]*(1-c) - u[0]*s],
                              [u[0]*u[2]*(1-c)-u[1]*s, u[1]*u[2]*(1-c)+u[0]*s, u[2]**2*(1-c)+c]])
+
+
     def calc_points(self, t):
         self.calcul_rot(self.v*t)
         self.points = self.centre @ self.ones + self.rot @ self.points
-     c cfw c
+
