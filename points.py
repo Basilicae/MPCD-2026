@@ -1,4 +1,6 @@
 import numpy as np
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 
 
 class objet:
@@ -17,7 +19,7 @@ class objet_fixe(objet):
 
 
 class objet_rotation(objet):
-    def __init__(self, n, points,  centre, v, u):
+    def __init__(self, n, points,  centre, v, u, radar):
         """
         :param n: Le nombre de points de l'objet
         :param points: Une liste de tuple de taille 3, chacun représentant les cooedonnées d'un point par rapport au centre
@@ -30,8 +32,7 @@ class objet_rotation(objet):
         self.centre = np.array(centre)
         self.ones = np.ones((1,n))
         self.v, self.u =v, u
-        self.points_prec = np.array(points)
-
+        self.distance_anc = self.distance_radar(radar)
     def calcul_rot(self, theta):
         u = self.u
         c = np.cos(theta)
@@ -45,6 +46,8 @@ class objet_rotation(objet):
         self.calcul_rot(self.v*t)
         self.points = self.centre @ self.ones + self.rot @ self.points
 
+    def distance_radar(self, radar):
+        return np.sqrt(np.sum((self.points - self.radar @ self.ones)**2, axis=1))
     def vitesse(self, t, delta_t, radar):
         """
         :param
@@ -52,11 +55,11 @@ class objet_rotation(objet):
         :param delta_t:
         :return: Un tableau de une ligne et self.n colonnes, chaque colonne indique la vitesse du ième point par rapport au radar
         """
-        self.points_prec = self.points.copy()
+        self.calc_points(t)
+        distances = self.distance_radar(radar)
 
-import numpy as np
-import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
+
+
 
 import numpy as np
 import matplotlib.pyplot as plt
