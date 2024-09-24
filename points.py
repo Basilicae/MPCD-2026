@@ -65,19 +65,20 @@ class objet_vibration(objet):
 
 
 class objet_translation(objet):
-    def __init__(self, n, points, centre, d, u, v):
+    def __init__(self, n, points, centre, direction, v,radar):
         """
         :param n: Nombre de points de l'objet
         :param points: Une liste de tuples, chaque tuple représente un point de l'objet
         :param centre: Le centre de l'objet par rapport à la position initiale
         :param direction: Vecteur directionnel de translation
-        :param velocity: Vitesse de translation
+        :param v: Vitesse de translation
         """
         super().__init__(n)
         self.points_init = np.array(points).T
         self.points = self.points_init.copy()
         self.centre = np.atleast_2d(centre).T
-        self.d = d
+        self.direction = np.atleast_2d(direction).T  # Normalisation
+        self.direction = self.direction / np.linalg.norm(self.direction)  # Normalisation
         self.v = v
         self.ones = np.ones((1, n))
 
@@ -85,7 +86,7 @@ class objet_translation(objet):
         """
         Calcule les points de l'objet en fonction du temps t pour une translation linéaire.
         """
-        translation = self.d * self.v * t
+        translation = self.direction * self.v * t
         self.points = self.ones + translation @ self.ones + self.points_init
 
 class objet_rotation(objet):
