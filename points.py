@@ -168,8 +168,6 @@ def affiche_objet(ob : objet, temps_anim, pas):
     ani = FuncAnimation(fig, ob.empl_points, frames = frames, fargs=[pas, scatter], interval=pas*1000, blit = False)
     plt.show()
 
-
-
 pt_init =           [[1, 1, 0],
                      [-1, 1, 0],
                      [-1, -1, 0],
@@ -179,5 +177,43 @@ a = objet_vibration(4, pt_init, (5,5,5), 3, (1,0,0))
 
 rotation = objet_vibration(4,pt_init,(0,0,0),5,(0,0,1),2)
 
-
 affiche_objet(rotation, 10, 0.1)
+
+
+def affiche_scene(objets, deplacements, temps_anim, pas):
+    """
+    Affiche une scène avec plusieurs objets en mouvement.
+
+    :param objets: Liste d'objets à afficher.
+    :param deplacements: Liste de fonctions de déplacement correspondantes pour chaque objet.
+    :param temps_anim: Durée totale de l'animation en secondes.
+    :param pas: Intervalle de temps entre chaque frame de l'animation.
+    """
+    frames = int(temps_anim // pas)
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+
+    scatters = []
+    for ob in objets:
+        scatter = ax.scatter(ob.points[:, 0], ob.points[:, 1], ob.points[:, 2], marker='o')
+        scatters.append(scatter)
+
+    ax.set_xlabel('X Label')
+    ax.set_ylabel('Y Label')
+    ax.set_zlabel('Z Label')
+
+    def update(num):
+        for i, ob in enumerate(objets):
+            ob.calc_points(num * pas)
+            scatters[i]._offsets3d = (ob.points[0, :], ob.points[1, :], ob.points[2, :])
+        return scatters
+
+    ani = FuncAnimation(fig, update, frames=frames, interval=pas * 1000, blit=False)
+    plt.show()
+
+# Exemple d'utilisation
+pt_init = [[1, 1, 0], [-1, 1, 0], [-1, -1, 0], [1, -1, 0]]
+obj1 = objet_vibration(4, pt_init, (5, 5, 5), 3, (1, 0, 0), 2)
+obj2 = objet_rotation(4, pt_init, (0, 0, 0), 5, (0, 0, 1), (10, 10, 10))
+
+affiche_scene([obj1, obj2], [obj1.calc_points, obj2.calc_points], 10, 0.1)
