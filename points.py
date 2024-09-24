@@ -4,9 +4,9 @@ from mpl_toolkits.mplot3d import Axes3D
 from matplotlib.animation import FuncAnimation
 
 class objet:
-    def __init__(self, n):
+    def __init__(self, n, radar):
         self.n = n
-
+        self.radar = radar
     def calc_points(self,  t):
         pass
 
@@ -39,8 +39,8 @@ class objet:
 
 
 class objet_fixe(objet):
-    def __init__(self, n,  points):
-        super().__init__(n)
+    def __init__(self, n,  points, radar):
+        super().__init__(n, radar)
         self.points = points
 
     def calc_points(self, t):
@@ -50,8 +50,17 @@ class objet_fixe(objet):
         return np.zeros((1,self.n))
 
 class objet_vibration(objet):
-    def __init__(self, n, points, centre, d, u, v):
-        super().__init__(n)
+    def __init__(self, n, points, centre, d, u, v, radar):
+        """
+
+        :param n: Le nombre de points
+        :param points: le tableau de points (pas un tab numpy
+        :param centre: le centre des points
+        :param d:
+        :param u:
+        :param v:
+        """
+        super().__init__(n, radar)
         self.points = np.array(points).T
         self.points_init = self.points.copy()
         self.centre = np.atleast_2d(centre).T
@@ -65,7 +74,7 @@ class objet_vibration(objet):
 
 
 class objet_translation(objet):
-    def __init__(self, n, points, centre, d, u, v):
+    def __init__(self, n, points, centre, d, u,v,  radar):
         """
         :param n: Nombre de points de l'objet
         :param points: Une liste de tuples, chaque tuple représente un point de l'objet
@@ -73,11 +82,12 @@ class objet_translation(objet):
         :param direction: Vecteur directionnel de translation
         :param velocity: Vitesse de translation
         """
-        super().__init__(n)
+        super().__init__(n, radar)
         self.points_init = np.array(points).T
         self.points = self.points_init.copy()
         self.centre = np.atleast_2d(centre).T
         self.d = d
+        self.u = np.atleast_2d(u).T
         self.v = v
         self.ones = np.ones((1, n))
 
@@ -85,8 +95,8 @@ class objet_translation(objet):
         """
         Calcule les points de l'objet en fonction du temps t pour une translation linéaire.
         """
-        translation = self.d * self.v * t
-        self.points = self.ones + translation @ self.ones + self.points_init
+        translation = self.u * (self.d * self.v * t)  # Translation vector over time
+        self.points = translation @ self.ones + self.points_init
 
 class objet_rotation(objet):
     def __init__(self, n, points,  centre, v, u, radar):
@@ -126,7 +136,9 @@ class objet_immo(objet):
         self.points = np.array(points).T
         self.ones = np.ones((1,n))
         self.centre = np.atleast_2d(centre).T
-
+        self.vitesse_ = np.zeros((1,n))
+    def vitesse(self, t):
+        return self.vitesse_
 
 
 
@@ -173,9 +185,8 @@ pt_init =           [[1, 1, 0],
                      [-1, -1, 0],
                      [1, -1, 0]]
 
-a = objet_vibration(4, pt_init, (5,5,5), 3, (1,0,0))
 
-rotation = objet_vibration(4,pt_init,(0,0,0),5,(0,0,1),2)
+rotation = objet_vibration(4, pt_init,(0,0,0), 5, (1,0,0), 0.2, (-15,0,0))
 
 affiche_objet(rotation, 10, 0.1)
 
