@@ -46,6 +46,14 @@ class objet_fixe(objet):
     def calc_points(self, t):
         pass
 
+    def vitesse(self, t, delta_t):
+        return np.zeros((1,self.n))
+
+class objet_vibration(objet):
+    def __init__(self, n, points, centre, d, u):
+        super().__init__(n)
+        self.points = np.array(points).T
+        self.centre = np.atleast_2d(centre).T
 
 
 class objet_rotation(objet):
@@ -78,7 +86,14 @@ class objet_rotation(objet):
 
     def calc_points(self, t):
         self.calcul_rot(self.v*t)
-        self.points = self.centre @ self.ones + self.rot @ self.points_init
+        self.points = self.rot @ self.points_init
+
+class objet_immo(objet):
+    def __init__(self, n, points, centre):
+        super().init(n)
+        self.points = np.array(points).T
+        self.ones = np.ones((1,n))
+        self.centre = np.atleast_2d(centre).T
 
 
 
@@ -120,6 +135,7 @@ def affiche_objet(ob : objet, temps_anim, pas):
     ax.set_zlabel('Z Label')
     ani = FuncAnimation(fig, ob.empl_points, frames = frames, fargs=[pas, scatter], interval=pas*1000, blit = False)
     plt.show()
+
 
 
 pt_init =           [[1, 1, 0],
