@@ -2,16 +2,18 @@ import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib.animation import FuncAnimation
-
 class objet:
     def __init__(self, n, radar):
         self.n = n
-        self.radar = radar
+        self.radar = np.atleast_2d(np.array(radar)).T  # vecteur colonne
+
     def calc_points(self,  t):
         pass
 
     def distance_radar(self):
-        return np.sqrt(np.sum((self.points - self.radar @ self.ones)**2, axis=1))
+        radar_position = self.radar.flatten()  # Now it should work
+        distances = np.sqrt(np.sum((self.points - radar_position[:, np.newaxis]) ** 2, axis=0))
+        return distances
 
     def empl_points(self, num, pas, scatter):
         """
@@ -68,34 +70,38 @@ class objet_vibration(objet):
         self.u = np.atleast_2d(u).T
         self.ones = np.ones((1, n))
         self.v = v
+        self.distance_anc = self.distance_radar()
 
     def calc_points(self,  t):
         self.points = (self.u * self.d * np.sin(t*np.pi/2/self.v) )@ self.ones + self.points_init
 
 
 class objet_translation(objet):
-    def __init__(self, n, points, centre, d, u,v,  radar):
+    def __init__(self, n, points, centre, d, u, v, radar):
         """
         :param n: Nombre de points de l'objet
-        :param points: Une liste de tuples, chaque tuple représente un point de l'objet
-        :param centre: Le centre de l'objet par rapport à la position initiale
-        :param direction: Vecteur directionnel de translation
-        :param velocity: Vitesse de translation
+        :param points: Une liste de tuples représentant les coordonnées des points
+        :param centre: Le centre de l'objet
+        :param d: La distance maximale de translation
+        :param u: Vecteur directionnel de translation
+        :param v: Vitesse de translation
         """
         super().__init__(n, radar)
         self.points_init = np.array(points).T
         self.points = self.points_init.copy()
         self.centre = np.atleast_2d(centre).T
-        self.d = d
-        self.u = np.atleast_2d(u).T
-        self.v = v
+        self.d = d  # Maximum translation distance
+        self.u = np.atleast_2d(u).T / np.linalg.norm(u)  # Normalize direction
+        self.v = v  # Velocity
         self.ones = np.ones((1, n))
+        self.distance_anc = self.distance_radar()
 
     def calc_points(self, t):
         """
         Calcule les points de l'objet en fonction du temps t pour une translation linéaire.
         """
-        translation = self.u * (self.d * self.v * t)  # Translation vector over time
+        deplacement = min(self.d, self.v * t)  # Limiter le deplacement d'une distance `d`
+        translation = self.u * deplacement  # Translation vector over time
         self.points = translation @ self.ones + self.points_init
 
 class objet_rotation(objet):
@@ -107,7 +113,7 @@ class objet_rotation(objet):
         :param v: La vitesse de rotation en degrées par secondes
         :param u: Le vecteur qui définit le sens de rotation
         """
-        super().__init__(n)
+        super().__init__(n, radar)
 
         self.radar = np.atleast_2d(radar).T
         self.points_init = np.array(points).T
@@ -186,9 +192,11 @@ pt_init =           [[1, 1, 0],
                      [1, -1, 0]]
 
 
-rotation = objet_vibration(4, pt_init,(0,0,0), 5, (1,0,0), 0.2, (-15,0,0))
+#rotation = objet_vibration(4, pt_init,(0,0,0), 5, (1,0,0), 0.2, (-15,0,0))
+#translation_obj = objet_translation(4, pt_init, (0, 0, 0), d=10, u=(1, 0, 0), v=1, radar=(0, 0, 0))
 
-affiche_objet(rotation, 10, 0.1)
+#affiche_objet(rotation, 10, 0.1)
+#affiche_objet(translation_obj, 10, 0.1)
 
 
 def affiche_scene(objets, deplacements, temps_anim, pas):
@@ -223,8 +231,8 @@ def affiche_scene(objets, deplacements, temps_anim, pas):
     plt.show()
 
 # Exemple d'utilisation
-pt_init = [[1, 1, 0], [-1, 1, 0], [-1, -1, 0], [1, -1, 0]]
-obj1 = objet_vibration(4, pt_init, (5, 5, 5), 3, (1, 0, 0), 2)
-obj2 = objet_rotation(4, pt_init, (0, 0, 0), 5, (0, 0, 1), (10, 10, 10))
+#pt_init = [[1, 1, 0], [-1, 1, 0], [-1, -1, 0], [1, -1, 0]]
+#obj1 = objet_vibration(4, pt_init, (5, 5, 5), 3, (1, 0, 0), 2)
+#obj2 = objet_rotation(4, pt_init, (0, 0, 0), 5, (0, 0, 1), (10, 10, 10))
 
-affiche_scene([obj1, obj2], [obj1.calc_points, obj2.calc_points], 10, 0.1)
+#affiche_scene([obj1, obj2], [obj1.calc_points, obj2.calc_points], 10, 0.1)
