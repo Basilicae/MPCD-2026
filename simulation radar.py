@@ -117,8 +117,10 @@ if __name__ == "__main__":
         img = spectrogramme(3E-2, [objet_rotation_, battie],0.5,300,bornes_f=(-6000,6000))
         img.save("premiere_exp_fe_dim.png")
     elif demonstration == "rotation_helice-4pt":
-        points_init = [[1,1,0], [-1,-1,0]]
-        objet_rotation_ = objet_rotation(2, points_init, (0, 0, 0), v=20, u=(0, 0, 1), radar=(-10, 0, 0))
+        points_init = [[1,1,0], [-1,1,0],[0,-np.sqrt(2),0]]
+        objet_rotation_ = objet_rotation(3, points_init, (0, 0, 0), v=20, u=(0, 0, 1), radar=(-10, 0, 0))
         battie = objet_fixe(1, [[0, 0, 0]], (-10, 0, 0))
-        img = spectrogramme(3E-2, [objet_rotation_, battie],0.5,300,bornes_f=(-6000,6000))
+        img = spectrogramme(3E-2, [objet_rotation_, battie],3,300,bornes_f=(-6000,6000))
         img.save("premiere_exp_fe_dim.png")
+    elif demonstration == "une troisième demo wowowow":
+        print('salut')
