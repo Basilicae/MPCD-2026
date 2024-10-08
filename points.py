@@ -11,7 +11,7 @@ class objet:
         pass
 
     def distance_radar(self):
-        radar_position = self.radar.flatten()  # Now it should work
+        radar_position = self.radar.flatten()
         distances = np.sqrt(np.sum((self.points - radar_position[:, np.newaxis]) ** 2, axis=0))
         return distances
 
@@ -41,9 +41,10 @@ class objet:
 
 
 class objet_fixe(objet):
-    def __init__(self, n,  points, radar):
+    def __init__(self, n,  points, radar, coeff = 1):
         super().__init__(n, radar)
         self.points = points
+        self.coeff = coeff
 
     def calc_points(self, t):
         pass
@@ -52,7 +53,7 @@ class objet_fixe(objet):
         return np.zeros((1,self.n))
 
 class objet_vibration(objet):
-    def __init__(self, n, points, centre, d, u, v, radar):
+    def __init__(self, n, points, centre, d, u, v, radar, coeff = 1):
         """
 
         :param n: Le nombre de points
@@ -71,13 +72,14 @@ class objet_vibration(objet):
         self.ones = np.ones((1, n))
         self.v = v
         self.distance_anc = self.distance_radar()
+        self.coeff = coeff
 
     def calc_points(self,  t):
         self.points = (self.u * self.d * np.sin(t*np.pi/2/self.v) )@ self.ones + self.points_init
 
 
 class objet_translation(objet):
-    def __init__(self, n, points, centre, d, u, v, radar):
+    def __init__(self, n, points, centre, d, u, v, radar,  coeff = 1):
         """
         :param n: Nombre de points de l'objet
         :param points: Une liste de tuples représentant les coordonnées des points
@@ -95,6 +97,7 @@ class objet_translation(objet):
         self.v = v  # Velocity
         self.ones = np.ones((1, n))
         self.distance_anc = self.distance_radar()
+        self.coeff = coeff
 
     def calc_points(self, t):
         """
@@ -105,7 +108,7 @@ class objet_translation(objet):
         self.points = translation @ self.ones + self.points_init
 
 class objet_rotation(objet):
-    def __init__(self, n, points,  centre, v, u, radar):
+    def __init__(self, n, points,  centre, v, u, radar,  coeff = 1):
         """
         :param n: Le nombre de points de l'objet
         :param points: Une liste de tuple de taille 3, chacun représentant les cooedonnées d'un point par rapport au centre
@@ -123,6 +126,7 @@ class objet_rotation(objet):
         self.ones = np.ones((1,n))
         self.v, self.u =v, u
         self.distance_anc = self.distance_radar()
+        self.coeff = coeff
     def calcul_rot(self, theta):
         u = self.u
         c = np.cos(theta)
@@ -136,15 +140,7 @@ class objet_rotation(objet):
         self.calcul_rot(self.v*t)
         self.points = self.rot @ self.points_init
 
-class objet_immo(objet):
-    def __init__(self, n, points, centre):
-        super().init(n)
-        self.points = np.array(points).T
-        self.ones = np.ones((1,n))
-        self.centre = np.atleast_2d(centre).T
-        self.vitesse_ = np.zeros((1,n))
-    def vitesse(self, t):
-        return self.vitesse_
+
 
 
 
@@ -199,12 +195,11 @@ pt_init =           [[1, 1, 0],
 #affiche_objet(translation_obj, 10, 0.1)
 
 
-def affiche_scene(objets, deplacements, temps_anim, pas):
+def affiche_scene(objets, temps_anim, pas):
     """
     Affiche une scène avec plusieurs objets en mouvement.
 
     :param objets: Liste d'objets à afficher.
-    :param deplacements: Liste de fonctions de déplacement correspondantes pour chaque objet.
     :param temps_anim: Durée totale de l'animation en secondes.
     :param pas: Intervalle de temps entre chaque frame de l'animation.
     """
@@ -230,9 +225,11 @@ def affiche_scene(objets, deplacements, temps_anim, pas):
     ani = FuncAnimation(fig, update, frames=frames, interval=pas * 1000, blit=False)
     plt.show()
 
-# Exemple d'utilisation
-#pt_init = [[1, 1, 0], [-1, 1, 0], [-1, -1, 0], [1, -1, 0]]
-#obj1 = objet_vibration(4, pt_init, (5, 5, 5), 3, (1, 0, 0), 2)
-#obj2 = objet_rotation(4, pt_init, (0, 0, 0), 5, (0, 0, 1), (10, 10, 10))
 
-#affiche_scene([obj1, obj2], [obj1.calc_points, obj2.calc_points], 10, 0.1)
+if __name__ == "__main__":
+    #Exemple d'utilisation
+    pt_init = [[1, 1, 0], [-1, 1, 0], [-1, -1, 0], [1, -1, 0]]
+    obj1 = objet_vibration(4, pt_init, (5, 5, 5), 3, (1, 0, 0), 2, (10, 10, 10))
+    obj2 = objet_rotation(4, pt_init, (0, 0, 0), 5, (0, 0, 1), (10, 10, 10))
+
+    affiche_scene([obj1, obj2], 100, 0.1)
