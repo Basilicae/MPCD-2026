@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.signal import stft
 
-iq_path = "exp/exp2_22.10.24AvecDronecentre2.7GHz.iq" #A modifier
+iq_path = "C:\Applis\PyCharm\Projects\MDCP\Data\exp1_22.10.24SansDronecentre2.7GHz.iq" #A modifier
 
 
 

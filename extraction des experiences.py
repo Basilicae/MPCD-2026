@@ -5,36 +5,21 @@ from scipy.signal import stft
 ### Extraction fichier : On obtient une liste de [I,Q,I,Q...]
 
 # 1e étape : Déf de la fct lecture de fichier
-def read_iq_file(file_path, data_type=np.float32):
-    iq_data = np.fromfile(file_path, dtype=data_type) # Lire le fichier binaire
+def read_iq_file(file_path, data_type=np.int16):
+    iq_data = np.fromfile(file_path, dtype=data_type)  # Lire le fichier binaire
     return iq_data
-
 
 # 2e étape : Comparaison des mesures avec ou sans drone
 file_path_1 = "C:\Applis\PyCharm\Projects\MDCP\Data\exp1_22.10.24SansDronecentre2.7GHz.iq"
 sd = read_iq_file(file_path_1)
 file_path_2 = "C:\Applis\PyCharm\Projects\MDCP\Data\exp2_22.10.24AvecDronecentre2.7GHz.iq"
 ad = read_iq_file(file_path_2)
-#delta = ad-sd
-
-
-# # 3e étape : Tracé des données
-# t = np.linspace(0, len(sd)+1, 2000000)
-# plt.plot(t, sd, label = "sd")
-# plt.plot(t, ad, label = "ad")
-# plt.plot(t, delta, label = "delta")
-# plt.legend()
-# plt.xlabel('t')
-# plt.ylabel('Données')
-# plt.title('Tracé des données du fichier')
-# plt.grid(True)
-# plt.show()
 
 
 
 ### Reconstitution du signal
 
-# 1e étape : récuperer les I et les Q pour reconstituer x(t) = Icos(2pift)  + Qsin(2pift)
+# 1e étape : Séparation des indices pour obtenir I et Q
 def separer_indices(liste):
     pairs = []
     impairs = []
@@ -45,51 +30,61 @@ def separer_indices(liste):
             impairs.append(liste[i])
     return pairs, impairs
 
-Isd,Qsd = separer_indices(sd)
-Iad,Qad = separer_indices(ad)
-Idelta,Qdelta = separer_indices(delta)
+Isd, Qsd = separer_indices(sd)
+Iad, Qad = separer_indices(ad)
 
-# 2e étape :  reconstituer le signal
-def x(t, I, Q, f):
-    return I * np.cos(2*np.pi*f*t) + Q * np.sin(2*np.pi*f*t)
+# 2e étape : Reconstitution du signal
+def x(I, Q):
+    return I + 1j * Q               #(I * np.cos(2 * np.pi * f * t) + Q * np.sin(2 * np.pi * f * t))
+#a = x(Isd, Qsd)
 
-# # 3e étape : tracer les signaux
-# t = np.linspace(0, len(sd)+1, 1000000)
-# plt.plot(t, x(t,Isd,Qsd,2.7e9), label = "xsd")
-# plt.plot(t, x(t,Iad,Qad,2.7e9), label = "xad")
-# #plt.plot(t, x(t,Idelta,Qdelta,2.7e9), label = "xdelta")
-# plt.legend()
-# plt.xlabel('t')
-# plt.ylabel('Données')
-# plt.title('Tracé des signaux')
-# plt.grid(True)
-# plt.show()
+# 3e étape : Tracé des signaux
+t = np.linspace(0, len(sd) + 1, 2000000)
+plt.plot(t, x(Isd, Qsd), label="xsd")
+plt.plot(t, x(Iad, Qad), label="xad")
+#plt.plot(t, x(t, Idelta, Qdelta, 2.7e9), label="xdelta")
+plt.legend()
+plt.xlabel('t')
+plt.ylabel('Données')
+plt.title('Tracé des signaux')
+plt.grid(True)
+plt.show()
 
 
 
 ### Transformées
 
 # 1e étape : TF(x) et STFT (X)
+def STFT(signal):
+    return stft(signal, fs=5e-9)
 
-t = np.linspace(0, len(sd)+1, 1000000)
-# def STFT(x):
-#     return stft(x,5e-9)
-# fsd,Tsd,Zxxsd = STFT(x(t,Isd,Qsd,2.7e9))
-# fad,Tad,Zxxad = STFT(x(t,Iad,Qad,2.7e9))
-# plt.figure()
-# plt.pcolormesh(Tsd, fsd, 10*np.log10(np.abs(Zxxsd)))
-# plt.show()
-# plt.figure()
-# plt.pcolormesh(Tad, fad, 10*np.log10(np.abs(Zxxad)))
-# plt.show()
+fsd, Tsd, Zxxsd = STFT(x(Isd, Qsd))
+fad, Tad, Zxxad = STFT(x(Iad, Qad))
 
-a = x(t,Isd,Qsd,2.7e9)
-Xsd = np.fft.fft(x(t,Isd,Qsd,2.7e9))
-Xad = np.fft.fft(x(t,Iad,Qad,2.7e9))
-# Xsd = np.fft.fftshift(Xsd)
-# Xad = np.fft.fftshift(Xad)
+# Affichage des spectrogrammes STFT
+plt.figure()
+plt.pcolormesh(Tsd, fsd, 10 * np.log10(np.abs(Zxxsd)))
+plt.title("STFT - Experiment 1 (No Drone)")
+plt.colorbar(label="Magnitude (dB)")
+plt.show()
 
-fe = 1
-plt.plot(np.linspace(-fe/2,fe/2,len(Xsd)), Xsd)
-plt.plot(np.linspace(-fe/2,fe/2,len(Xsd)), Xad)
+plt.figure()
+plt.pcolormesh(Tad, fad, 10 * np.log10(np.abs(Zxxad)))
+plt.title("STFT - Experiment 2 (With Drone)")
+plt.colorbar(label="Magnitude (dB)")
+plt.show()
+
+# Calcul et tracé des Transformées de Fourier
+Xsd = np.fft.fft(x(Isd, Qsd))
+Xad = np.fft.fft(x(Iad, Qad))
+
+fe = 2e+08
+freqs = np.fft.fftfreq(len(Xsd), d=1/fe)
+
+plt.plot(freqs, np.abs(Xsd), label="Xsd")
+plt.plot(freqs, np.abs(Xad), label="Xad")
+plt.xlabel("Frequency (Hz)")
+plt.ylabel("Amplitude")
+plt.title("Fourier Transform of Reconstructed Signals")
+plt.legend()
 plt.show()
