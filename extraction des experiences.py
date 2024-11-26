@@ -28,7 +28,7 @@ def separer_indices(liste):
             pairs.append(liste[i])
         else:
             impairs.append(liste[i])
-    return pairs, impairs
+    return np.array(pairs), np.array(impairs)
 
 Isd, Qsd = separer_indices(sd)
 Iad, Qad = separer_indices(ad)
@@ -38,17 +38,17 @@ def x(I, Q):
     return I + 1j * Q               #(I * np.cos(2 * np.pi * f * t) + Q * np.sin(2 * np.pi * f * t))
 #a = x(Isd, Qsd)
 
-# 3e étape : Tracé des signaux
-t = np.linspace(0, len(sd) + 1, 2000000)
-plt.plot(t, x(Isd, Qsd), label="xsd")
-plt.plot(t, x(Iad, Qad), label="xad")
-#plt.plot(t, x(t, Idelta, Qdelta, 2.7e9), label="xdelta")
-plt.legend()
-plt.xlabel('t')
-plt.ylabel('Données')
-plt.title('Tracé des signaux')
-plt.grid(True)
-plt.show()
+# # 3e étape : Tracé des signaux
+# t = np.linspace(0, len(sd) + 1, 2000000)
+# plt.plot(t, x(Isd, Qsd), label="xsd")
+# plt.plot(t, x(Iad, Qad), label="xad")
+# #plt.plot(t, x(t, Idelta, Qdelta, 2.7e9), label="xdelta")
+# plt.legend()
+# plt.xlabel('t')
+# plt.ylabel('Données')
+# plt.title('Tracé des signaux')
+# plt.grid(True)
+# plt.show()
 
 
 
@@ -74,17 +74,17 @@ plt.title("STFT - Experiment 2 (With Drone)")
 plt.colorbar(label="Magnitude (dB)")
 plt.show()
 
-# Calcul et tracé des Transformées de Fourier
-Xsd = np.fft.fft(x(Isd, Qsd))
-Xad = np.fft.fft(x(Iad, Qad))
-
-fe = 2e+08
-freqs = np.fft.fftfreq(len(Xsd), d=1/fe)
-
-plt.plot(freqs, np.abs(Xsd), label="Xsd")
-plt.plot(freqs, np.abs(Xad), label="Xad")
-plt.xlabel("Frequency (Hz)")
-plt.ylabel("Amplitude")
-plt.title("Fourier Transform of Reconstructed Signals")
-plt.legend()
-plt.show()
+# # Calcul et tracé des Transformées de Fourier
+# Xsd = np.fft.fft(x(Isd, Qsd))
+# Xad = np.fft.fft(x(Iad, Qad))
+#
+# fe = 2e+08
+# freqs = np.fft.fftfreq(len(Xsd), d=1/fe)
+#
+# plt.plot(freqs, np.abs(Xsd), label="Xsd")
+# plt.plot(freqs, np.abs(Xad), label="Xad")
+# plt.xlabel("Frequency (Hz)")
+# plt.ylabel("Amplitude")
+# plt.title("Fourier Transform of Reconstructed Signals")
+# plt.legend()
+# plt.show()
