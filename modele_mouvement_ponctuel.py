@@ -113,7 +113,7 @@ class objet_rotation(objet):
         :param n: Le nombre de points de l'objet
         :param points: Une liste de tuple de taille 3, chacun représentant les cooedonnées d'un point par rapport au centre
         :param centre: La position du centre de rotation par rapport au centre de l'objet complet
-        :param v: La vitesse de rotation en degrées par secondes
+        :param v: La vitesse de rotation en radians par secondes
         :param u: Le vecteur qui définit le sens de rotation
         """
         super().__init__(n, radar)
@@ -219,7 +219,7 @@ def affiche_scene(objets, temps_anim, pas):
     def update(num):
         for i, ob in enumerate(objets):
             ob.calc_points(num * pas)
-            scatters[i]._offsets3d = (ob.points[0, :], ob.points[1, :], ob.points[2, :])
+            scatters[i]._offsets3d = (ob.points[:, 0], ob.points[:, 1], ob.points[:, 2])
         return scatters
 
     ani = FuncAnimation(fig, update, frames=frames, interval=pas * 1000, blit=False)
@@ -228,8 +228,8 @@ def affiche_scene(objets, temps_anim, pas):
 
 if __name__ == "__main__":
     #Exemple d'utilisation
-    pt_init = [[1, 1, 0], [-1, 1, 0], [-1, -1, 0], [1, -1, 0]]
-    obj1 = objet_vibration(4, pt_init, (5, 5, 5), 3, (1, 0, 0), 2, (10, 10, 10))
-    obj2 = objet_rotation(4, pt_init, (0, 0, 0), 5, (0, 0, 1), (10, 10, 10))
+    pt_init = np.array([[1, 1, 0] , [-1,-1,0]])
+    objet_rotation_ = objet_rotation(2, pt_init, (0, 0, 0), v=20, u=(0, 0, 1), radar=(-10, 0, 0))
+    battie = objet_fixe(1, [[0, 0, 0]], (-10, 0, 0))
 
-    affiche_scene([obj1, obj2], 100, 0.1)
+    affiche_scene([objet_rotation_, battie], 100, 0.1)

@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.signal import stft
-from points import objet_translation, objet_rotation, objet_vibration, objet_fixe, affiche_scene  # Assurez-vous que le nom du fichier est correct
+from modele_mouvement_ponctuel import objet_translation, objet_rotation, objet_vibration, objet_fixe, affiche_scene  # Assurez-vous que le nom du fichier est correct
 from PIL import Image
 
 
@@ -40,7 +40,7 @@ def spectrogramme(lambda_, scene, tps_exp, f_e, bornes_f = None,res_f = 600):
                 ind = 2*v/lambda_ - bornes_f[0]
                 frequ_aff = int(ind * res_f / (bornes_f[1]-bornes_f[0]))
                 if 0 <= frequ_aff < res_f: #Si notre fenètre permet d'afficher la fréquence
-                    valeurs[frequ_aff, i] += obj.coeff
+                    valeurs[frequ_aff, i] = 1
                 else:
                     print("wowowow")
     #On normalise pour afficher
@@ -88,7 +88,7 @@ if __name__ == '__main__nope':
     objet_translation_ = objet_translation(1, points_init, (0, 0, 0), d=10, u=(1, 0, 0), v=1, radar=(0, 0, 0))
 
     # Rotation: Rotation autour de l'axe z à 5 radians par seconde
-    objet_rotation_ = objet_rotation(1, points_init, (0, 0, 0), v=5              , u=(0, 0, 1), radar=(0, 0, 0))
+    objet_rotation_ = objet_rotation(1, points_init, (0, 0, 0), v=5                , u=(0, 0, 1), radar=(0, 0, 0))
 
     # Vibration: Vibration le long de l'axe x avec une amplitude de 3, vitesse de 0.2
     objet_vibration_ = objet_vibration(1, points_init, (0, 0, 0), d=3, u=(1, 0, 0), v=0.2, radar=(0, 0, 0))
@@ -96,7 +96,6 @@ if __name__ == '__main__nope':
     spectrogramme(3e-2, [objet_rotation_], 0.1, 100000)
     # Simuler le signal radar pour la translation
     signal_radar_translation = simuler_retour_radar(objet_translation_, nombre_etapes_temps, longueur_onde_radar, frequence_echantillonnage)
-    generer_spectrogramme(signal_radar_translation, frequence_echantillonnage, "Signature Micro-Doppler: Translation")
 
     # Simuler le signal radar pour la rotation
     signal_radar_rotation = simuler_retour_radar(objet_rotation_, nombre_etapes_temps, longueur_onde_radar, frequence_echantillonnage)
@@ -110,17 +109,24 @@ if __name__ == "__main__":
     demonstration = "rotation_helice-4pt"
     if demonstration == "rotation_simple":
         points_init = [[1,1,0]]
-        print(objet_rotation)
         objet_rotation_ = objet_rotation(1, points_init, (0, 0, 0), v=20, u=(0, 0, 1), radar=(-10, 0, 0))
         battie = objet_fixe(1, [[0,0,0]], (-10,0,0))
         #affiche_scene([objet_rotation_, battie], 100, 5)
-        img = spectrogramme(3E-2, [objet_rotation_, battie],0.5,300,bornes_f=(-6000,6000))
-        img.save("premiere_exp_fe_dim.png")
+        img = spectrogramme(3E-2, [objet_rotation_, battie],1,900,bornes_f=(-3000,3000))
+        img.save("pafpaf.png")
     elif demonstration == "rotation_helice-4pt":
-        points_init = [[1,1,0], [-1,1,0],[0,-np.sqrt(2),0]]
+        points_init = [[1,1,0], [-1,-1,0]]
         objet_rotation_ = objet_rotation(3, points_init, (0, 0, 0), v=20, u=(0, 0, 1), radar=(-10, 0, 0))
         battie = objet_fixe(1, [[0, 0, 0]], (-10, 0, 0))
-        img = spectrogramme(3E-2, [objet_rotation_, battie],3,300,bornes_f=(-6000,6000))
+        img = spectrogramme(3E-2, [objet_rotation_, battie],1,900,bornes_f=(-3000,3000))
         img.save("premiere_exp_fe_dim.png")
-    elif demonstration == "une troisième demo wowowow":
+    elif demonstration == "quadricoptere":
+        points_init = [[1, 1, 0], [-1, 1, 0], [-1, -1, 0], [1, -1, 0]]
+        battie = objet_fixe(1, [[0, 0, 0]], (-10, 0, 0))
+        scene = [objet_rotation(4, points_init, (4, 4, 0), v=20, u=(0, 0, 1), radar=(-10, 0, 0)),
+                 objet_rotation(4, points_init, (-4, 4, 0), v=20, u=(0, 0, 1), radar=(-10, 0, 0)),
+                 objet_rotation(4, points_init, (-4, -4, 0), v=20, u=(0, 0, 1), radar=(-10, 0, 0)),
+                 objet_rotation(4, points_init, (4, -4, 0), v=20, u=(0, 0, 1), radar=(-10, 0, 0))]
+        img = spectrogramme(3E-2, scene, 1, 900, bornes_f=(-3000, 3000))
+        img.save("quadridri.png")
         print('salut')

@@ -1,14 +1,14 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import scipy.signal.windows
-from scipy.signal import stft
+from scipy.signal import stft, ShortTimeFFT
 
-iq_path = "C:\Applis\PyCharm\Projects\MDCP\Data\exp1_22.10.24SansDronecentre2.7GHz.iq" #A modifier
-iq_path_ad = "C:\Applis\PyCharm\Projects\MDCP\Data\exp2_22.10.24AvecDronecentre2.7GHz.iq"
+iq_path = "exp/exp1_22.10.24SansDronecentre2.7GHz.iq" #A modifier
+iq_path_ad = "exp/exp2_22.10.24AvecDronecentre2.7GHz.iq"
 
 # Extraction des paramètres à partir des métadonnées
 sample_rate = 2e8
-scale_factor = 10
+scale_factor = 1
 
 iq_data = np.fromfile(iq_path, dtype=np.int16)
 iq_data_ad = np.fromfile(iq_path_ad, dtype=np.int16)
@@ -58,24 +58,27 @@ plt.title("Spectre de Puissance du Signal IQ_ad")
 plt.show()
 
 
+
 nperseg = 2048  # nombre de points par segment (à ajuster pour la résolution souhaitée)
 noverlap = nperseg // 2  # nombre de points de chevauchement (50% ici)
-window = "barthann"
+fenetre_inter = 5e7
+window = "hann"
 frequences, temps, spectrogramme = stft(IQ_complex, noverlap = noverlap, nperseg=nperseg, return_onesided=False, fs=sample_rate,window=window)
+mask = (frequences < fenetre_inter) & (frequences > - fenetre_inter)
+print(np.sum(mask))
 plt.figure(figsize=(12, 6))
-plt.pcolormesh(temps, frequences, 10*np.log10(np.abs(spectrogramme)+1e-6), shading='gouraud')
+plt.pcolormesh(temps, frequences[mask], 10*np.log10(np.abs(spectrogramme[mask,:])+1e-6), shading='gouraud')
 plt.colorbar(label='Amplitude')
 plt.ylabel("Fréquence (Hz)")
 plt.xlabel("Temps (s)")
 plt.title("STFT (Spectrogramme) du signal IQ")
 plt.show()
 
-nperseg = 2048  # nombre de points par segment (à ajuster pour la résolution souhaitée)
-noverlap = nperseg // 2  # nombre de points de chevauchement (50% ici)
-window = "barthann"
+
 frequences_ad, temps_ad, spectrogramme_ad = stft(IQ_complex_ad, noverlap = noverlap, nperseg=nperseg, return_onesided=False, fs=sample_rate, window=window)
+mask = (frequences_ad < fenetre_inter) & (frequences_ad > - fenetre_inter)
 plt.figure(figsize=(12, 6))
-plt.pcolormesh(temps, frequences_ad, 10*np.log10(np.abs(spectrogramme_ad)+1e-6), shading='gouraud')
+plt.pcolormesh(temps, frequences_ad[mask], 10*np.log10(np.abs(spectrogramme_ad[mask, :])+1e-6), shading='gouraud')
 plt.colorbar(label='Amplitude')
 plt.ylabel("Fréquence (Hz)")
 plt.xlabel("Temps (s)")
